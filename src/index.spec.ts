@@ -1,46 +1,34 @@
-import 'reflect-metadata';
+import { mockServer } from '../src/mock/server';
+import { BidObserver } from '../src/BidObserver';
 import puppeteer, { Page } from 'puppeteer';
-import { Container } from 'inversify';
-import { BidObserver } from './BidObserver';
-import { mockServer } from './mock/server';
-import { injectable } from 'inversify';
 
-@injectable()
-class TestBidObserver extends BidObserver {}
+let page: Page;
+let browser: any;
+let bidObserver: any;
 
-describe('BidObserver', () => {
-  let container: Container;
-  let bidObserver: BidObserver;
-  let page: Page;
-  const serverUrl = 'http://localhost:3000';
+jest.setTimeout(30000); // Set timeout to 30 seconds
 
-  beforeAll(async () => {
-    container = new Container();
-    container.bind<BidObserver>(BidObserver).to(TestBidObserver);
-    bidObserver = container.get<BidObserver>(BidObserver);
+beforeAll(async () => {
+  mockServer.start();
+  browser = await puppeteer.launch();
+  page = await browser.newPage();
+  bidObserver = new BidObserver();
+});
 
-    const browser = await puppeteer.launch();
-    page = await browser.newPage();
+afterAll(() => {
+  mockServer.stop();
+  browser.close();
+});
 
-    mockServer.start();
-  });
+test('should emit newBid event when new bid appears', async () => {
+  const mockFn = jest.fn();
+  bidObserver.on('newBid', mockFn);
 
-  afterAll(async () => {
-    await page.browser().close();
-    mockServer.stop();
-  });
+  await bidObserver.observeUrl(page, 'http://localhost:3000');
 
-  it('should observe url and emit newBid event', async () => {
-    const newBidPromise = new Promise((resolve) => {
-      bidObserver.on('newBid', (bid) => {
-        resolve(bid);
-      });
-    });
+  // Wait for the mock server to insert the new bid
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    await bidObserver.observeUrl(page, serverUrl);
-
-    const newBid = await newBidPromise;
-
-    expect(newBid).toBe(23100);
-  });
+  expect(mockFn).toHaveBeenCalledTimes(1); // Check if the function was called
+  expect(mockFn).toHaveBeenCalledWith(23100); // Check if it was called with the correct argument
 });
