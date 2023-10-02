@@ -8,10 +8,18 @@ const port = 3000;
 let server: any;
 
 app.get('/', (req: Request, res: Response) => {
-  const html = fs.readFileSync(path.resolve(__dirname, 'auction.html'), 'utf8');
-  const script = fs.readFileSync(path.resolve(__dirname, 'script.js'), 'utf8');
+  const html = fs.readFileSync(
+    path.resolve(__dirname, 'pages', 'auction.html'),
+    'utf8'
+  );
+  const script = fs.readFileSync(
+    path.resolve(__dirname, 'scripts', 'script.js'),
+    'utf8'
+  );
 
-  const compiledFunction = pug.compileFile(path.resolve(__dirname, 'bid.pug'));
+  const compiledFunction = pug.compileFile(
+    path.resolve(__dirname, 'templates', 'bid.pug')
+  );
   const bidHtml = compiledFunction({ bidValue: '$23,100' });
 
   res.send(`

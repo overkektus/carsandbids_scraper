@@ -1,6 +1,7 @@
-import { mockServer } from '../src/mock/server';
-import { BidObserver } from '../src/BidObserver';
+import 'reflect-metadata';
 import puppeteer, { Page } from 'puppeteer';
+import { mockServer } from './server';
+import { BidObserver } from '../../src/BidObserver';
 
 let page: Page;
 let browser: any;
@@ -10,7 +11,7 @@ jest.setTimeout(30000); // Set timeout to 30 seconds
 
 beforeAll(async () => {
   mockServer.start();
-  browser = await puppeteer.launch();
+  browser = await puppeteer.launch({ headless: 'new' });
   page = await browser.newPage();
   bidObserver = new BidObserver();
 });

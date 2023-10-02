@@ -5,12 +5,12 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "npm run build && node dist/index.js",
-    "start:mock": "ts-node-dev --respawn --pretty --transpile-only src/mock/index.ts",
+    "start:mock-server": "cd mock && npm run start",
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
     "build": "tsc",
     "format": "prettier --write \"**/*.js\" --ignore-path .gitignore",
-    "cypress": "cypress open",
-    "test": "jest"
+    "test:cypress": "cypress open",
+    "test:server": "cd mock && npm run test"
   },
   "keywords": [],
   "author": "",
